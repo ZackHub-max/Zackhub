@@ -1,0 +1,52 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+-- Function to find the nearest player
+local function getNearestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+-- Function to execute the kill
+local function executeKill()
+    local target = getNearestPlayer()
+    if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+        local targetHRP = target.Character:FindFirstChild("HumanoidRootPart")
+        if targetHRP then
+            -- Teleport behind the target
+            LocalPlayer.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, -2)
+
+            -- Play animation (assuming an animation is set up)
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://12345678" -- Replace with a real animation ID
+            local animator = LocalPlayer.Character.Humanoid:FindFirstChild("Animator") or LocalPlayer.Character.Humanoid:FindFirstChildOfClass("AnimationController")
+            if animator then
+                local playAnim = animator:LoadAnimation(anim)
+                playAnim:Play()
+            end
+
+            -- Kill the target
+            target.Character.Humanoid.Health = 0
+        end
+    end
+end
+
+-- Create a keybind (Press "K" to execute kill)
+Mouse.KeyDown:Connect(function(key)
+    if key == "k" then
+        executeKill()
+    end
+end)
